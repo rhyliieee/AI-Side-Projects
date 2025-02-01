@@ -1,0 +1,88 @@
+### Source Title: [CPG] Periodic Health Examination_ Screening for Cardiovascular Disease.pdf
+#### From Page Number(s): 14, 15, 16
+**Relevant Content:**
+Cardiovascular disease is the leading cause of death in the country today. Several factors contribute to cardiovascular disease, with environmental influences and lifestyle changes being the primary culprits. Cigarette smoking, diabetes mellitus, elevated cholesterol, obesity, and physical inactivity are some identified factors that can lead to cardiovascular death. Early identification and addressing of these factors may reduce the burden of cardiovascular diseases in the country.
+
+Thus, it is important to recognize the significance of screening individuals for cardiovascular diseases. This consensus statement addresses screening for cardiovascular diseases among apparently healthy, asymptomatic adult Filipino individuals. Such individuals are generally considered to have no overt symptoms of cardiovascular disease, such as chest pain, difficulty breathing, or claudication, among others. The consensus panel also defined these individuals as lacking modifiable risk factors such as cigarette smoking, hypertension, and diabetes. The critical cardiovascular outcomes include cardiovascular mortality, all-cause mortality, fatal and non-fatal myocardial infarction, and cerebrovascular disease.
+
+3. GUIDELINE DEVELOPMENT METHODOLOGY
+
+3.1 Organization of the Process
+
+Following international standards, the Department of Health (DOH) outlined the guideline development process into four phases: 1) preparation and prioritization, 2) Clinical Practice Guideline (CPG) generation, 3) CPG appraisal, and 4) implementation in the Manual for CPG Development [1].
+
+In the preparation and prioritization phase, the Steering Committee set the CPG objectives, scope, target audience, and clinical questions. They consulted different stakeholders in prioritizing and developing the guideline questions. They identified and formed the working groups involved in creating the evidence base and finalizing the recommendations for each clinical question included.
+
+The evidence review experts (ERE) or the technical working group were tasked to review existing CPGs, appraise and summarize the evidence, and draft the initial recommendations. The evidence summaries were then presented to the consensus panel members to finalize the recommendations.
+
+The consensus panel comprised multisectoral representatives tasked to review the evidence summaries and develop recommendations during the en banc meeting. In the meeting, they prioritized critical and important outcomes, discussed necessary considerations revolving around the recommendations, and voted on each.
+The following text describes the process of developing evidence summaries for the Philippine Guidelines on Periodic Health Examination (PHEX) 2021, specifically focusing on cardiovascular disease screening. A modified Delphi method was used to resolve recommendations not settled during the en banc meeting. Clinical questions were formulated using the PICO (Population, Intervention, Comparator, Outcome) format. The Evidence Review Experts (ERE) searched and appraised international practice guidelines, including those from the Canadian Task Force on Preventive Health Care, U.S. Preventive Services Task Force, and the National Institute for Health and Care Excellence. Guidelines of good quality and published within the last five years (2016-2021) were adopted. Initial cardiovascular risk factors and diseases identified for PHEX included hypertension, dyslipidemia, atrial fibrillation, carotid artery stenosis, coronary heart disease, peripheral artery disease, and abdominal aortic aneurysm. The second phase of PHEX focused on familial hypercholesterolemia, atrial fibrillation, coronary artery disease, carotid artery stenosis, peripheral artery disease, and abdominal aortic aneurysm. Systematic searches in electronic databases like MEDLINE via PubMed, CENTRAL, and Google Scholar were conducted from May to November 2021. Evidence summaries were generated for sixteen questions, assessing the burden of the problem, diagnostic performance, benefits, harm, and social and economic impact of the screening tests or interventions. The quality of evidence was evaluated using the GRADE approach.
+The important step in the creation of this clinical practice guidelines (CPGs) is determining the strengths of the recommendation. The Grading of Recommendations Assessment, Development and Evaluation (GRADE) approach was used in assessing the recommendations. The Steering Committee (SC) and the Evidence Review Experts (ERE) identified the outcomes that were used in deciding the recommendations for the clinical questions (refer to Table 1). 
+
+Table 1. Cardiovascular Outcomes GRADE Score
+
+All
+
+#### From Page Number(s): 1
+**Relevant Content:**
+Screening for Cardiovascular Disease
+
+The following section outlines the guidelines for screening cardiovascular diseases among asymptomatic, apparently healthy adult Filipinos. These guidelines, part of the \"Philippine Guidelines on Periodic Health Examination (PHEX) 2021,\" were developed by the Department of Health and the National Institutes of Health. They provide evidence-based recommendations using the GRADE approach. The screening covers conditions such as familial hypercholesterolemia, coronary artery disease, carotid artery stenosis, peripheral arterial disease, abdominal aortic aneurysm, and atrial fibrillation. The guidelines aim to assist primary care physicians, policymakers, and healthcare stakeholders in the early detection and management of cardiovascular risk factors. The document is intended to be updated every three years or when new evidence emerges.
+
+#### From Page Number(s): 28, 29, 30
+**Relevant Content:**
+41. Expert Panel on Integrated Guidelines for Cardiovascular Health and Risk Reduction in Children and Adolescents; National Heart, Lung, and Blood Institute. Expert panel on integrated guidelines for cardiovascular health and risk reduction in children and adolescents: summary report. Pediatrics. 2011; 128 Suppl 5 (Suppl 5): S213-S256.
+
+42. Tai ES, Chia BL, Bastian AC, Chua T, Ho SC, Koh TS, Low LP, Tey JS, Poh KK, Tan CE, Ting P, Tham TY, Toh SA, van Dam RM. Ministry of Health Clinical Practice Guidelines: Lipids. Singapore Med J. 2017 Mar; 58 (3): 155-166. doi: 10.11622/smedj.2017018. PMID: 28361160.
+
+43. Weng SF, Kai J, Andrew Neil H, Humphries SE, Qureshi N. Improving identification of familial hypercholesterolemia in primary care: derivation and validation of the familial hypercholesterolemia case ascertainment tool (FAMCAT). Atherosclerosis. 2015 Feb; 238 (2): 336-43.
+
+44. Troeung L, Arnold-Reed D, Chan She Ping-Delfos W, Watts GF, Pang J, Lugonja M, Bulsara M, Mortley D, James M, Brett T. A new electronic screening tool for identifying risk of familial hypercholesterolemia in general practice. Heart. 2016 Jun 1; 102 (11): 855-61.
+
+45. Lozano P, Henrikson NB, Dunn J, et al. Lipid Screening in Childhood and Adolescence for Detection of Familial Hypercholesterolemia: A Systematic Evidence Review for the U.S. Preventive Services Task Force [Internet]. Rockville (MD): Agency for Healthcare Research and Quality (US); 2016 Aug. (Evidence Syntheses, No. 141.) Available from: https://www.ncbi.nlm.nih.gov/books/NBK379718/
+
+4.2 Screening for Coronary Artery Disease
+
+Use of Resting Echocardiography for Coronary Artery Disease
+
+RECOMMENDATION
+
+Among asymptomatic, apparently healthy adults, we recommend against screening for coronary artery disease using resting echocardiography (STRONG recommendation, moderate level of evidence).
+
+Use of Stress Echocardiography for Coronary Artery Disease
+
+RECOMMENDATION
+
+Among asymptomatic, apparently healthy adults, we recommend against screening for coronary artery disease using stress echocardiography (STRONG recommendation, moderate level of evidence).
+
+The consensus panel considered the following when formulating this recommendation:
+
+- Emphasize that the recommendations are meant for asymptomatic, healthy adults.
+- Identify modifiable risk factors such as smoking and elevated blood sugars.
+
+4.2.1 Burden of Disease
+
+A. Prevalence of Disease
+The global and local burden of coronary artery disease (CAD) is significant. In the Philippines, cardiovascular diseases have consistently ranked among the top 10 leading causes of morbidity for the past four decades. In 2019 and 2020, ischemic heart disease was the leading cause of mortality in the Philippines, with numbers increasing yearly. In 2020, fatalities due to ischemic heart disease increased by 7.8 percent from the previous year and constituted 17.1 percent of all deaths in the country. Furthermore, deaths due to ischemic heart disease in 2020 exceeded the five-year average (2015-2019) by almost 30 percent.
+
+In 2008, Sy et al. conducted a national survey on the prevalence of atherosclerosis-related risk factors and diseases in the Philippines. The authors noted that the prevalence of hypertension, diabetes, and dyslipidemia increased compared to 2003 data, but the prevalence of coronary artery disease (1.1%) did not. The data on the prevalence of CAD, however, was based on whether the survey respondents had been previously diagnosed by other physicians, and could therefore underestimate the true prevalence of CAD.
+
+Coronary artery disease most commonly presents as angina. In 2003, a Food and Nutrition Research Institute (FNRI) study revealed that the prevalence of angina pectoris among Filipinos is 11%, while the prevalence of CAD was 1.1%. In 2012, the International Study of Comparative Health Effectiveness with Medical and Invasive Approaches (ISCHEMIA) trial found that women reported fewer angina-free days in the past month than men (27% vs. 37%), as well as more severe chest pain and other symptoms, even if they were found to have less extensive CAD (72.1% with multivessel disease > 50% stenosis vs. 80.7% in men) on further testing. 
+
+B. Natural Course of the Disease
+
+### Source Title: [CPG] Periodic Health Examination_ Lifestyle Advice.pdf
+#### From Page Number(s): 1
+**Relevant Content:**
+Lifestyle Advice 
+PERIODIC HEALTH EXAMINATION TASK FORCE 2021 
+Medical Examination 
+PHILIPPINES 
+Department of Health 
+
+The text above is part of the "Philippine Guidelines on Periodic Health Examination," specifically focusing on lifestyle advice. Developed by the Periodic Health Examination Task Force in 2021, this section aims to provide guidance on lifestyle modifications for better health outcomes. It is intended for healthcare providers and policymakers in the Philippines to use as a reference for advising Filipino adults and adolescents on lifestyle choices. The guidelines emphasize evidence-based recommendations to promote health and prevent disease through non-pharmacologic interventions.
+
+#### From Page Number(s): 1
+**Relevant Content:**
+The following text is from the document titled "Philippine Guidelines on Periodic Health Examination." This document provides clinical practice guidelines (CPG) developed by the Department of Health and the National Institutes of Health Institute of Clinical Epidemiology. It focuses on lifestyle advice for Filipino adults and adolescents. The guidelines cover a range of health topics, including smoking cessation, electronic nicotine delivery systems, safe sex practices, physical activity, nutrition, stress reduction, and internet addiction. The purpose of these guidelines is to offer evidence-based recommendations to healthcare providers, policymakers, and other stakeholders to promote better health outcomes through non-pharmacologic interventions. The guidelines are based on the GRADE framework to ensure they are adaptable to the Philippine context and are updated every three years or as new evidence becomes available.
+
