@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "ai-implementations"
+version = "0.1.0"
+description = "AI Integration and Implementation"
+authors = ["rhyliieee <csharp.mastr@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.11, <3.13"
+langchain = "^0.3.14"
+langgraph = "^0.2.62"
+langchain-groq = "^0.2.3"
+langchain-openai = "^0.3.0"
+fastapi = "^0.115.6"
+uvicorn = "^0.34.0"
+ipykernel = "^6.29.5"
+langchain-docling = "^0.2.0"
+langchain-mistralai = "^0.2.4"
+transformers = "^4.48.1"
+huggingface-hub = "^0.27.1"
+sentence-transformers = "^3.3.1"
+einops = "^0.8.0"
+langchain-google-genai = "^2.0.9"
+google-generativeai = "^0.8.4"
+nomic = "^3.4.1"
+faiss-cpu = "^1.9.0.post1"
+pyarrow = "^19.0.0"
+slowapi = "^0.1.9"
+streamlit = "^1.41.1"
+sseclient = "^0.0.27"
+
+
+[tool.poetry.group.dev.dependencies]
+python-dotenv = "^1.0.1"
+langsmith = "^0.2.10"
+groundx = "^2.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
