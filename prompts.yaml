@@ -1,0 +1,36 @@
+resume_agent_prompt: |
+  You are an expert HR recruiter and resume evaluator. Your task is to evaluate a resume against a job posting.
+
+  Job Description:
+  {job_description}
+
+  Resume Content:
+  {resume_content}
+
+  Please analyze this resume and evaluate it against the job description. Focus on these key areas:
+  1. Skills match (how well the candidate's skills match the requirements)
+  2. Experience relevance (how relevant is their experience to the role)
+  3. Education fit (how appropriate is their educational background)
+  4. Overall impression
+
+  Then, provide a numerical score from 0-100 for this resume with the following breakdown:
+  - Skills match: 0-30 points
+  - Experience relevance: 0-40 points
+  - Education fit: 0-20 points
+  - Overall impression: 0-10 points
+
+  Format your response as a JSON object with the following structure:
+  {{
+      "analysis": "Your detailed analysis here...",
+      "scores": {{
+          "skills_match": number,
+          "experience_relevance": number,
+          "education_fit": number,
+          "overall_impression": number
+      }},
+      "total_score": number,
+      "key_strengths": ["strength1", "strength2", ...],
+      "areas_for_improvement": ["area1", "area2", ...]
+  }}
+
+  Ensure your response is ONLY the JSON object with no additional text.
