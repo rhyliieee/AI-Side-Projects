@@ -26,10 +26,16 @@ import json
 from dotenv import load_dotenv
 import asyncio
 from playwright.async_api import async_playwright
+from playwright.sync_api import sync_playwright
 import requests
+
+import sys
 
 from data_models import ResumeFeedback
 from utils import load_prompts
+
+if sys.platform.startswith("win"):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 load_dotenv()
 
@@ -95,6 +101,47 @@ def get_llm(model_name):
         )
 
 llm = get_llm(llm_model)
+
+# PROCESS TXT FILES
+def process_txt(txt_file):
+    try:
+        job_description_content = txt_file.getvalue().decode("utf-8")
+        job_descriptions = [{
+            "name": txt_file.name,
+            "content": job_description_content
+        }]
+        st.success(f"Job description uploaded: {txt_file.name}")
+
+        return job_descriptions
+    except Exception as e:
+        st.error(f"Error reading job description file: {str(e)}")
+
+# PROCESS TXT DIRECTORY
+def process_txt_directory(directory_path):
+    job_descriptions = []
+
+
+    # BEGIN PROCESSING EACH .txt files
+    job_files = list(Path(directory_path).glob("**/*.txt"))
+
+    if job_files:
+        with st.spinner(f"Processing {len(job_files)} .txt files..."):
+            for job_file in job_files:
+                try:
+                    with open(job_file, "r", encoding='utf-8') as f:
+                        job_description_content = f.read()
+                        
+                    job_descriptions.append({
+                        "name": job_file.name,
+                        "content": job_description_content
+
+                    })
+                except Exception as e:
+                    st.error(f"Error reading job description file {job_file.name}: {str(e)}")
+                
+            return job_descriptions
+    else:
+        st.warning("No .txt files found in the directory")
 
 # Resume processing functions
 def process_pdfs(pdf_files):
@@ -311,105 +358,54 @@ tab1, tab2 = st.tabs(["Resume Ranking", "Results Explanation"])
 
 with tab1:
     # Job description input
-    st.header("Step 1: Enter Job Description")
-    # job_description = st.text_area(
-    #     "Paste the job description here:",
-    #     height=200,
-    #     help="Enter the full job description to compare resumes against."
-    # )
-    
-    # @st.cache_resource   #Cache for 1 hour
-    async def scrape_job_listings(url):
-        """Scrape job listings from the provided URL using Playwright"""
-        job_links = []
-        
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
-            
-            try:
-                await page.goto(url, wait_until="domcontentloaded")
-                
-                # Wait for job listings to load
-                await page.wait_for_selector('.awsm-job-listing-item.awsm-grid-item', timeout=10000)
-                
-                # Get all job listing items
-                job_items = await page.query_selector_all('.awsm-job-listing-item.awsm-grid-item')
-                
-                for item in job_items:
-                    # Find the link in each job item
-                    link_element = await item.query_selector('a')
-                    if link_element:
-                        job_url = await link_element.get_attribute('href')
-                        job_title = await link_element.text_content()
-                        job_links.append({
-                            'title': job_title.strip(),
-                            'url': job_url
-                        })
-                        print(f"\n\n---JOB LINK: {job_links}---\n\n")
-            except Exception as e:
-                st.error(f"Error scraping job listings: {str(e)}")
-            finally:
-                await browser.close()
-                
-        return job_links
-    
-    async def scrape_job_description(url):
-        "USE JINA AI TO CONVERT A GIVEN LINK INTO A MARKDOWN TEXT"
-        job_description = ""
-        try:
-            # url = "https://r.jina.ai/https://example.com"
-            headers = {
-                "Authorization": "Bearer jina_28012d41c50549dcaaf9966f76018193D9LBJZPO-m68G9a693l3sNYIbIy9",
-                "X-No-Cache": "true",
-                "X-Retain-Images": "none",
-                "X-Target-Selector": ".awsm-job-content"
-            }
+    st.header("Step 1: Upload Job Descriptions")
+    job_description_option = st.radio(
+        "Choose Job Description Upload Method",
+        ("Upload individual TXT files", "Upload a folder of TXT files")
+    )
 
-            response = await requests.get(url, headers=headers)
-            job_description = response.text
-            print(f"---JOB DESCRIPTION: {job_description}---")
-            return job_description
-        except Exception as e:
-            st.error(f"Error scraping job description: {str(e)}")
-            print(f"---ERROR SCRAPING JOB DESCRIPTION: {str(e)}---")
+    job_descriptions = []
 
-    # Default URL
-    default_url = "https://direcbusiness.com/careers/"
-    job_site_url = st.text_input("Job listing URL", value=default_url)
-    
-    if st.button("Fetch Job Listings"):
-        with st.spinner("Fetching job listings..."):
-            job_listings = asyncio.run(scrape_job_listings(job_site_url))
-            if job_listings:
-                st.session_state.job_listings = job_listings
-                st.success(f"Found {len(job_listings)} job listings!")
-            else:
-                st.error("No job listings found. Please check the URL or website structure.")
-    
-    # Display job listings and let user select
-    job_description = ""
-    if "job_listings" in st.session_state and st.session_state.job_listings:
-        selected_job = st.selectbox(
-            "Select a job posting to analyze resumes against:",
-            options=st.session_state.job_listings,
-            format_func=lambda x: x['title']
+    if job_description_option == "Upload individual TXT files":
+        uploaded_job_file = st.file_uploader(
+            "Upload job description TXT file",
+            type=["txt"],
+            help="Upload a .txt file containing the job description"
         )
-        
-        if selected_job and st.button("Fetch Job Description"):
-            with st.spinner("Fetching job description..."):
-                job_description_md = asyncio.run(scrape_job_description(selected_job['url']))
-                
-                # Store in session state
-                st.session_state.job_description = job_description_md
-                
-                # Display job description
-                with st.expander("Job Description", expanded=True):
-                    st.write(job_description_md)
+
+        if uploaded_job_file:
+            job_descriptions = process_txt(uploaded_job_file)
     
-    # Use the stored job description if available
-    if "job_description" in st.session_state:
-        job_description = st.session_state.job_description
+    else: # UPLOAD FOLDER OPTION
+        upload_dir = st.text_input(
+            "Enter the path to directory containing job description TXT files:",
+            help="Example: /path/to/job_descriptions"
+        )
+        if upload_dir and os.path.isdir(upload_dir):
+            st.success(f"Directory found: {upload_dir}")
+            job_descriptions = process_txt_directory(upload_dir)
+        elif upload_dir:
+            st.error(f"Directory not found: {upload_dir}")
+
+    # Select job description if multiple are available
+    selected_job_description = None
+    if len(job_descriptions) > 1:
+        selected_job = st.selectbox(
+            "Select a job description:",
+            options=job_descriptions,
+            format_func=lambda x: x['name']
+        )
+        if selected_job:
+            selected_job_description = selected_job["content"]
+            with st.expander("Job Description", expanded=True):
+                st.write(selected_job_description)
+    elif len(job_descriptions) == 1:
+        selected_job_description = job_descriptions[0]["content"]
+        with st.expander("Job Description", expanded=True):
+            st.write(selected_job_description)
+    
+    # Use the selected job description
+    job_description = selected_job_description
 
     # File upload options
     st.header("Step 2: Upload Resumes")
