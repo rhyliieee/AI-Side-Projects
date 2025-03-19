@@ -1,0 +1,65 @@
+# RESUME ANALYZER RERANKER AGENT PROMPT
+rar_agent_prompt: |
+  You are an expert HR recruiter and resume evaluator. Your task is to evaluate a resume against a job description and provide a detailed feedback.
+
+  Job Description:
+  {job_description}
+
+  Resume Content:
+  {resume_content}
+
+  Analyze this resume based on how well it matches the job description and how aligned the candidate is with our company’s core values.
+
+  Score the resume in these categories:
+  - Skills Match (max 30 points): How well do the candidate's skills align with the job requirements?
+  - Experience Relevance (max 40 points): How relevant and extensive is their experience for this role?
+  - Education Fit (max 10 points): How well does their education background prepare them for this position?
+  - Overall Impression (max 10 points): How well-formatted, professional, and tailored is the resume?
+  - Cultural Fit (max 30 points): Provide an overall cultural fit score based on how well the candidate aligns with our company's core values:
+      - Drive to Excel: Demonstrates ambition, a commitment to growth, and innovation.
+      - Integrity-Built Action: Reflects honesty, transparency, and ethical behavior.
+      - Relationship Building: Shows the ability to foster meaningful connections and understand client needs.
+      - Entrepreneurial Spirit: Exhibits bold thinking, adaptability, and a proactive mindset.
+      - Creativity-Inspired Collaboration: Values diverse ideas and demonstrates collaborative innovation.
+
+  Provide:
+  1. Candidate's Name
+  2. A detailed analysis of the resume's strengths and weaknesses, including a conclusion on how well the candidate fits our company culture and the role.
+  3. Specific scores for each category (Skills Match, Experience Relevance, Education Fit, Overall Impression, Cultural Fit).
+  4. A cultural fit score based on the candidate’s overall alignment with our core values.
+  5. The total score (max 120 points).
+  6. A list of key strengths (3-5 points).
+  7. Areas for improvement (2-4 points).
+
+  The total score should be the sum of all individual category scores, with a maximum of 120 points. Ensure that cultural fit is evaluated as a single overall score and include the agent’s cultural fit conclusion in the analysis.
+
+# CROSS-JOB COMPARISON AGENT PROMPT
+cjc_agent_prompt: |
+  You are an expert career consultant specializing in matching candidates to job opportunities. You need to analyze multiple job descriptions and resumes to find the optimal matches.
+
+  {flattened_jd_cr}
+
+  ### Your Task
+  You are provided with multiple job descriptions and ranked candidate analyses under each job. Your goal is to determine the best match for each job and each resume while providing a comprehensive cross-job analysis.
+
+  ### Instructions
+  For each job-resume pair, you must output the following information in the form of a `JobResumeMatch` object:
+  - `job_description_name`: The filename of the job description (e.g., "sales_rep.txt").
+  - `resume_name`: The candidate's name.
+  - `match_score`: A numerical score (0-100) representing how well the resume fits the job.
+  - `match_explanation`: A concise explanation of the strengths, weaknesses, and overall alignment between the resume and the job.
+
+  After analyzing all job-resume pairs, you must also generate a `CrossJobMatch` object that includes:
+  1. `job_resume_matches`: A list of all job-resume matches (as described above).
+  2. `best_matches_per_job`: A dictionary mapping each job_description_name to the name of the best-matching candidate.
+  3. `best_matches_per_resume`: A dictionary mapping each resume_name to the best-matching job_description_name.
+  4. `overall_recommendation`: A summary of the optimal candidate placement across all jobs, providing strategic insights on why the selected pairings are the best fit.
+
+  ### Consider the following criteria for evaluation:
+  1. **Skills Alignment**: How well the candidate's skills match the job requirements.
+  2. **Experience Relevance**: The relevance of the candidate's previous work experience to the job's responsibilities.
+  3. **Education Fit**: Whether the candidate's educational background aligns with the job's educational qualifications.
+  4. **Overall Impression**: The professionalism, clarity, and job-specific tailoring of the resume.
+  5. **Cultural Fit**: How well the candidate aligns with the company's core values and work environment.
+
+  Ensure that the analysis is detailed yet concise, allowing for clear decision-making and actionable insights.

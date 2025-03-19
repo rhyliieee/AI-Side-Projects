@@ -33,6 +33,7 @@ import sys
 
 from data_models import ResumeFeedback
 from utils import load_prompts
+from graph import create_multi_job_comparison_agent, initialize_multi_job_state
 
 if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -95,7 +96,7 @@ def get_llm(model_name):
         )
     else:
         return ChatGoogleGenerativeAI(
-            model_name=model_name,
+            model=model_name,
             api_key=os.getenv("GOOGLE_AI_STUDIO_API_KEY"),
             temperature=0.2
         )
@@ -196,7 +197,7 @@ def process_directory(directory_path):
 @st.cache_resource
 def get_vectorstore():
     # Initialize embeddings
-    embeddings = HuggingFaceInferenceAPIEmbeddings(
+    embedding_model = HuggingFaceInferenceAPIEmbeddings(
         api_key=os.getenv("HF_API_KEY"),
         model_name="sentence-transformers/all-MiniLM-l6-v2"
     )
@@ -212,7 +213,7 @@ def get_vectorstore():
     # Create a temporary vector store
     vectorstore = Chroma(
         collection_name="resume_ranking",
-        embedding_function=embeddings,
+        embedding_function=embedding_model,
         persist_directory="./chroma_db"
     )
     
@@ -271,9 +272,6 @@ def analyze_resume(state: AgentState) -> AgentState:
         
         # Add resume name to the result
         result_dict["resume_name"] = current_resume["name"]
-
-        # CONVERT RESULT BACK TO ResumeFeedback OBJECT
-        # result = ResumeFeedback(**result_dict)
         
         # Update the state
         state["scores"].append(result_dict)
@@ -353,198 +351,376 @@ def create_resume_ranking_agent():
     
     return workflow.compile()
 
-# Main application layout
-tab1, tab2 = st.tabs(["Resume Ranking", "Results Explanation"])
+def create_main_layout():
+    # Main application layout
+    tab1, tab2, tab3 = st.tabs(["Resume Ranking", "Results Explanation", "Multi-Job Comparison"])
 
-with tab1:
-    # Job description input
-    st.header("Step 1: Upload Job Descriptions")
-    job_description_option = st.radio(
-        "Choose Job Description Upload Method",
-        ("Upload individual TXT files", "Upload a folder of TXT files")
-    )
-
-    job_descriptions = []
-
-    if job_description_option == "Upload individual TXT files":
-        uploaded_job_file = st.file_uploader(
-            "Upload job description TXT file",
-            type=["txt"],
-            help="Upload a .txt file containing the job description"
+    with tab1:
+        # Job description input
+        st.header("Step 1: Upload Job Descriptions")
+        job_description_option = st.radio(
+            "Choose Job Description Upload Method",
+            ("Upload individual TXT files", "Upload a folder of TXT files")
         )
 
-        if uploaded_job_file:
-            job_descriptions = process_txt(uploaded_job_file)
-    
-    else: # UPLOAD FOLDER OPTION
-        upload_dir = st.text_input(
-            "Enter the path to directory containing job description TXT files:",
-            help="Example: /path/to/job_descriptions"
-        )
-        if upload_dir and os.path.isdir(upload_dir):
-            st.success(f"Directory found: {upload_dir}")
-            job_descriptions = process_txt_directory(upload_dir)
-        elif upload_dir:
-            st.error(f"Directory not found: {upload_dir}")
+        job_descriptions = []
 
-    # Select job description if multiple are available
-    selected_job_description = None
-    if len(job_descriptions) > 1:
-        selected_job = st.selectbox(
-            "Select a job description:",
-            options=job_descriptions,
-            format_func=lambda x: x['name']
-        )
-        if selected_job:
-            selected_job_description = selected_job["content"]
+        if job_description_option == "Upload individual TXT files":
+            uploaded_job_file = st.file_uploader(
+                "Upload job description TXT file",
+                type=["txt"],
+                help="Upload a .txt file containing the job description"
+            )
+
+            if uploaded_job_file:
+                job_descriptions = process_txt(uploaded_job_file)
+        
+        else: # UPLOAD FOLDER OPTION
+            upload_dir = st.text_input(
+                "Enter the path to directory containing job description TXT files:",
+                help="Example: /path/to/job_descriptions"
+            )
+            if upload_dir and os.path.isdir(upload_dir):
+                st.success(f"Directory found: {upload_dir}")
+                job_descriptions = process_txt_directory(upload_dir)
+            elif upload_dir:
+                st.error(f"Directory not found: {upload_dir}")
+
+        # Select job description if multiple are available
+        selected_job_description = None
+        if len(job_descriptions) > 1:
+            selected_job = st.selectbox(
+                "Select a job description:",
+                options=job_descriptions,
+                format_func=lambda x: x['name']
+            )
+            if selected_job:
+                selected_job_description = selected_job["content"]
+                with st.expander("Job Description", expanded=True):
+                    st.write(selected_job_description)
+        elif len(job_descriptions) == 1:
+            selected_job_description = job_descriptions[0]["content"]
             with st.expander("Job Description", expanded=True):
                 st.write(selected_job_description)
-    elif len(job_descriptions) == 1:
-        selected_job_description = job_descriptions[0]["content"]
-        with st.expander("Job Description", expanded=True):
-            st.write(selected_job_description)
-    
-    # Use the selected job description
-    job_description = selected_job_description
+        
+        # Use the selected job description
+        job_description = selected_job_description
 
-    # File upload options
-    st.header("Step 2: Upload Resumes")
-    upload_option = st.radio(
-        "Choose upload method:",
-        ("Upload individual PDF files", "Upload a folder of PDF files")
-    )
-    
-    documents = []
-    
-    if upload_option == "Upload individual PDF files":
-        uploaded_files = st.file_uploader(
-            "Upload resume PDF files", 
-            type="pdf", 
-            accept_multiple_files=True
+        # File upload options
+        st.header("Step 2: Upload Resumes")
+        upload_option = st.radio(
+            "Choose upload method:",
+            ("Upload individual PDF files", "Upload a folder of PDF files")
         )
         
-        if uploaded_files:
-            st.success(f"{len(uploaded_files)} files uploaded")
-            documents = process_pdfs(uploaded_files)
+        documents = []
+        
+        if upload_option == "Upload individual PDF files":
+            uploaded_files = st.file_uploader(
+                "Upload resume PDF files", 
+                type="pdf", 
+                accept_multiple_files=True
+            )
             
-    else:  # Upload folder option
-        upload_dir = st.text_input(
-            "Enter the path to directory containing resume PDFs:",
-            help="Example: /path/to/resumes"
-        )
+            if uploaded_files:
+                st.success(f"{len(uploaded_files)} files uploaded")
+                documents = process_pdfs(uploaded_files)
+                
+        else:  # Upload folder option
+            upload_dir = st.text_input(
+                "Enter the path to directory containing resume PDFs:",
+                help="Example: /path/to/resumes"
+            )
+            
+            if upload_dir and os.path.isdir(upload_dir):
+                st.success(f"Directory found: {upload_dir}")
+                documents = process_directory(upload_dir)
+                st.info(f"{len(documents)} PDF files found in the directory")
+            elif upload_dir:
+                st.error(f"Directory not found: {upload_dir}")
         
-        if upload_dir and os.path.isdir(upload_dir):
-            st.success(f"Directory found: {upload_dir}")
-            documents = process_directory(upload_dir)
-            st.info(f"{len(documents)} PDF files found in the directory")
-        elif upload_dir:
-            st.error(f"Directory not found: {upload_dir}")
-    
-    # Process button
-    if st.button("Rank Resumes", disabled=not (job_description and documents)):
-        if not job_description:
-            st.error("Please enter a job description")
-        elif not documents:
-            st.error("Please upload at least one resume")
-        else:
-            with st.spinner("Analyzing and ranking resumes... This may take a few minutes."):
-                # Prepare data for the agent
-                resumes = []
-                for doc in documents:
-                    resumes.append({
-                        "name": doc.metadata["source"],
-                        "content": doc.page_content
-                    })
-                
-                # Initialize the agent
-                resume_agent = create_resume_ranking_agent()
-                
-                # Execute the agent
-                initial_state = initialize_state(job_description, resumes)
-                final_state = resume_agent.invoke(initial_state)
-                
-                # Store results in session state for the results tab
-                st.session_state.ranking_results = final_state["final_ranking"]
-                st.session_state.job_description = job_description
-                
-                # Display summary
-                st.success("Analysis complete! View detailed results in the Results Explanation tab.")
-                
-                # Create a DataFrame for the results
-                results_df = pd.DataFrame([
-                    {
-                        "Rank": result["rank"],
-                        "Resume": result["resume_name"],
-                        "Total Score": result["total_score"],
-                        "Skills Match": result["scores"]["skills_match"],
-                        "Experience": result["scores"]["experience_relevance"],
-                        "Education": result["scores"]["education_fit"],
-                        "Impression": result["scores"]["overall_impression"]
-                    }
-                    for result in final_state["final_ranking"]
-                ])
-                
-                # Display the results table
-                st.header("Ranking Results")
-                st.dataframe(
-                    results_df.style.highlight_max(subset=["Total Score"], color="lightgreen"),
-                    use_container_width=True
-                )
+        # Process button
+        if st.button("Rank Resumes", disabled=not (job_description and documents)):
+            if not job_description:
+                st.error("Please enter a job description")
+            elif not documents:
+                st.error("Please upload at least one resume")
+            else:
+                with st.spinner("Analyzing and ranking resumes... This may take a few minutes."):
+                    # Prepare data for the agent
+                    resumes = []
+                    for doc in documents:
+                        resumes.append({
+                            "name": doc.metadata["source"],
+                            "content": doc.page_content
+                        })
+                    
+                    # Initialize the agent
+                    resume_agent = create_resume_ranking_agent()
+                    
+                    # Execute the agent
+                    initial_state = initialize_state(job_description, resumes)
+                    final_state = resume_agent.invoke(initial_state)
+                    
+                    # Store results in session state for the results tab
+                    st.session_state.ranking_results = final_state["final_ranking"]
+                    st.session_state.job_description = job_description
+                    
+                    # Display summary
+                    st.success("Analysis complete! View detailed results in the Results Explanation tab.")
+                    
+                    # Create a DataFrame for the results
+                    results_df = pd.DataFrame([
+                        {
+                            "Rank": result["rank"],
+                            "Resume": result["resume_name"],
+                            "Total Score": result["total_score"],
+                            "Skills Match": result["scores"]["skills_match"],
+                            "Experience": result["scores"]["experience_relevance"],
+                            "Education": result["scores"]["education_fit"],
+                            "Impression": result["scores"]["overall_impression"]
+                        }
+                        for result in final_state["final_ranking"]
+                    ])
+                    
+                    # Display the results table
+                    st.header("Ranking Results")
+                    st.dataframe(
+                        results_df.style.highlight_max(subset=["Total Score"], color="lightgreen"),
+                        use_container_width=True
+                    )
 
-with tab2:
-    if "ranking_results" in st.session_state:
-        st.header("Detailed Ranking Results")
-        
-        # Display job description
-        with st.expander("Job Description", expanded=True):
-            st.write(st.session_state.job_description)
-        
-        # Create tabs for each resume
-        ranked_resumes = st.session_state.ranking_results
-        resume_tabs = st.tabs([f"#{r['rank']} - {r['resume_name']} (Score: {r['total_score']})" for r in ranked_resumes])
-        
-        for i, tab in enumerate(resume_tabs):
-            resume_data = ranked_resumes[i]
-            with tab:
-                col1, col2 = st.columns([2, 1])
+    with tab2:
+        if "ranking_results" in st.session_state:
+            st.header("Detailed Ranking Results")
+            
+            # Display job description
+            with st.expander("Job Description", expanded=True):
+                st.write(st.session_state.job_description)
+            
+            # Create tabs for each resume
+            ranked_resumes = st.session_state.ranking_results
+            resume_tabs = st.tabs([f"#{r['rank']} - {r['resume_name']} (Score: {r['total_score']})" for r in ranked_resumes])
+            
+            for i, tab in enumerate(resume_tabs):
+                resume_data = ranked_resumes[i]
+                with tab:
+                    col1, col2 = st.columns([2, 1])
+                    
+                    with col1:
+                        st.subheader("Analysis")
+                        st.write(resume_data["analysis"])
+                    
+                    with col2:
+                        # Score breakdown
+                        st.subheader("Score Breakdown")
+                        scores = resume_data["scores"]
+                        
+                        # Create a DataFrame for the scores
+                        score_data = {
+                            "Category": ["Skills Match", "Experience Relevance", "Education Fit", "Overall Impression", "Total"],
+                            "Score": [
+                                scores["skills_match"],
+                                scores["experience_relevance"],
+                                scores["education_fit"],
+                                scores["overall_impression"],
+                                resume_data["total_score"]
+                            ],
+                            "Max": [30, 40, 20, 10, 100]
+                        }
+                        score_df = pd.DataFrame(score_data)
+                        
+                        # Display as a table
+                        st.dataframe(score_df, use_container_width=True, hide_index=True)
+                        
+                        # Display key strengths
+                        st.subheader("Key Strengths")
+                        for strength in resume_data["key_strengths"]:
+                            st.markdown(f"✅ {strength}")
+                        
+                        # Display areas for improvement
+                        st.subheader("Areas for Improvement")
+                        for area in resume_data["areas_for_improvement"]:
+                            st.markdown(f"🔍 {area}")
+        else:
+            st.info("Run the resume ranking process first to see detailed results.")
+    with tab3:
+        st.header("Multi-Job Comparison")
+        st.markdown("""
+            This tab allows you to compare multiple resumes against multiple job descriptions
+            to find the best matches across all combinations.
+        """)
+            
+        # Job descriptions input
+        st.subheader("Step 1: Upload Job Descriptions")
+        job_description_option = st.radio(
+            "Choose Job Description Upload Method",
+            ("Upload individual TXT files", "Upload a folder of TXT files"),
+            key="multi_job_upload_option"
+        )
+
+        job_descriptions = []
+
+        if job_description_option == "Upload individual TXT files":
+            uploaded_job_files = st.file_uploader(
+                "Upload job description TXT files",
+                type=["txt"],
+                accept_multiple_files=True,
+                help="Upload multiple .txt files containing job descriptions",
+                key="multi_job_uploader"
+            )
+
+            if uploaded_job_files:
+                for job_file in uploaded_job_files:
+                    job_desc = process_txt(job_file)
+                    if job_desc:
+                        job_descriptions.extend(job_desc)
+            
+        else:  # UPLOAD FOLDER OPTION
+            upload_dir = st.text_input(
+                "Enter the path to directory containing job description TXT files:",
+                help="Example: /path/to/job_descriptions",
+                key="multi_job_dir_input"
+            )
+            if upload_dir and os.path.isdir(upload_dir):
+                st.success(f"Directory found: {upload_dir}")
+                job_descriptions = process_txt_directory(upload_dir)
+            elif upload_dir:
+                st.error(f"Directory not found: {upload_dir}")
+            
+        if job_descriptions:
+            st.success(f"Loaded {len(job_descriptions)} job descriptions")
+            with st.expander("View Loaded Job Descriptions"):
+                for job in job_descriptions:
+                    st.markdown(f"### {job['name']}")
+                    st.text(job['content'][:300] + "...")
+            
+        # Resume upload
+        st.subheader("Step 2: Upload Resumes")
+        resume_upload_option = st.radio(
+            "Choose upload method:",
+            ("Upload individual PDF files", "Upload a folder of PDF files"),
+            key="multi_resume_upload_option"
+        )
+            
+        documents = []
+            
+        if resume_upload_option == "Upload individual PDF files":
+            uploaded_files = st.file_uploader(
+                "Upload resume PDF files", 
+                type="pdf", 
+                accept_multiple_files=True,
+                key="multi_resume_uploader"
+            )
                 
-                with col1:
-                    st.subheader("Analysis")
-                    st.write(resume_data["analysis"])
+            if uploaded_files:
+                st.success(f"{len(uploaded_files)} files uploaded")
+                documents = process_pdfs(uploaded_files)
+                    
+        else:  # Upload folder option
+            upload_dir = st.text_input(
+                "Enter the path to directory containing resume PDFs:",
+                help="Example: /path/to/resumes",
+                key="multi_resume_dir_input"
+            )
                 
-                with col2:
-                    # Score breakdown
-                    st.subheader("Score Breakdown")
-                    scores = resume_data["scores"]
-                    
-                    # Create a DataFrame for the scores
-                    score_data = {
-                        "Category": ["Skills Match", "Experience Relevance", "Education Fit", "Overall Impression", "Total"],
-                        "Score": [
-                            scores["skills_match"],
-                            scores["experience_relevance"],
-                            scores["education_fit"],
-                            scores["overall_impression"],
-                            resume_data["total_score"]
-                        ],
-                        "Max": [30, 40, 20, 10, 100]
-                    }
-                    score_df = pd.DataFrame(score_data)
-                    
-                    # Display as a table
-                    st.dataframe(score_df, use_container_width=True, hide_index=True)
-                    
-                    # Display key strengths
-                    st.subheader("Key Strengths")
-                    for strength in resume_data["key_strengths"]:
-                        st.markdown(f"✅ {strength}")
-                    
-                    # Display areas for improvement
-                    st.subheader("Areas for Improvement")
-                    for area in resume_data["areas_for_improvement"]:
-                        st.markdown(f"🔍 {area}")
-    else:
-        st.info("Run the resume ranking process first to see detailed results.")
+            if upload_dir and os.path.isdir(upload_dir):
+                st.success(f"Directory found: {upload_dir}")
+                documents = process_directory(upload_dir)
+                st.info(f"{len(documents)} PDF files found in the directory")
+            elif upload_dir:
+                st.error(f"Directory not found: {upload_dir}")
+            
+        # Process button
+        if st.button("Compare Across Jobs", disabled=not (job_descriptions and documents)):
+            if not job_descriptions:
+                st.error("Please upload at least one job description")
+            elif len(job_descriptions) < 2:
+                st.error("Please upload at least two job descriptions for comparison")
+            elif not documents:
+                st.error("Please upload at least one resume")
+            else:
+                with st.spinner("Analyzing resumes across all job descriptions... This may take several minutes."):
+                    # Prepare data for the multi-job agent
+                    resumes = []
+                    for doc in documents:
+                        resumes.append({
+                            "name": doc.metadata["source"],
+                            "content": doc.page_content
+                        })
+                        
+                    # Initialize and run the multi-job agent
+                    multi_job_agent = create_multi_job_comparison_agent()
+                    initial_state = initialize_multi_job_state(job_descriptions, resumes)
+                    final_state = multi_job_agent.invoke(initial_state)
+                        
+                    # Store results in session state
+                    st.session_state.multi_job_results = final_state
+                        
+                    # Display success message
+                    st.success("Multi-job comparison complete!")
+                        
+                    # Show results
+                    display_multi_job_results(final_state)
+
+def display_multi_job_results(state):
+    """Display the results of the multi-job comparison"""
+    if not state or not state["final_recommendations"]:
+        st.error("No results available to display")
+        return
+    
+    recommendations = state["final_recommendations"]
+    
+    # Display best matches per job
+    st.header("Best Candidate for Each Job")
+    best_matches_df = pd.DataFrame([
+        {
+            "Job Description": job_name,
+            "Best Candidate": resume_name,
+            "Score": next((m.match_score for m in recommendations.job_resume_matches 
+                          if m.job_description_name == job_name and m.resume_name == resume_name), 0)
+        }
+        for job_name, resume_name in recommendations.best_matches_per_job.items()
+    ])
+    
+    st.dataframe(best_matches_df, use_container_width=True)
+    
+    # Display all matches with ratings
+    st.header("All Job-Resume Match Ratings")
+    
+    # Create a job-resume score matrix
+    job_names = list(set(m.job_description_name for m in recommendations.job_resume_matches))
+    resume_names = list(set(m.resume_name for m in recommendations.job_resume_matches))
+    
+    # Create a heatmap-like visualization
+    match_data = {}
+    for job in job_names:
+        match_data[job] = {}
+        for resume in resume_names:
+            match = next((m for m in recommendations.job_resume_matches 
+                         if m.job_description_name == job and m.resume_name == resume), None)
+            if match:
+                match_data[job][resume] = match.match_score
+            else:
+                match_data[job][resume] = 0
+    
+    match_df = pd.DataFrame(match_data).T  # Transpose to have jobs as rows and resumes as columns
+    
+    # Display the heatmap-like matrix
+    st.dataframe(match_df.style.background_gradient(cmap="YlGnBu"), use_container_width=True)
+    
+    # Display detailed match explanations
+    st.header("Detailed Match Explanations")
+    for match in recommendations.job_resume_matches:
+        with st.expander(f"{match.job_description_name} ↔ {match.resume_name} (Score: {match.match_score})"):
+            st.write(match.match_explanation)
+    
+    # Display overall recommendation
+    st.header("Overall Recommendation")
+    st.write(recommendations.overall_recommendation)
+
+# MAIN APPLICATION LAYOUT
+create_main_layout()
 
 # Footer
 st.markdown("---")
