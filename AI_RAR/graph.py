@@ -14,17 +14,6 @@ from agents import create_cjc_agent, create_rar_agent
 # INITIALIZE CACHE MANAGER
 cache_manager = CacheManager()
 
-# NODE TO INITIALIZE STATES
-# def initialize_multi_job_state(job_descriptions: List[Dict[str, Any]], 
-#                      resumes: List[Dict[str, Any]]) -> MultiJobComparisonState:
-#     return {
-#         "job_descriptions": job_descriptions,
-#         "resumes": resumes,
-#         "all_rankings": {},
-#         "cross_job_analysis": {},
-#         "final_recommendations": None
-#     }
-
 # NODE TO ANALYZE AND RANK RESUMES FOR EACH JOB
 def rank_resumes_for_jobs(state: MultiJobComparisonState) -> MultiJobComparisonState:
     """RANK RESUMES FOR EACH JOB DESCRIPTION"""

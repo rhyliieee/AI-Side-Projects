@@ -122,57 +122,6 @@ def process_directory(directory_path, file_content):
                     raise RuntimeError(f"Error reading resume file {file_path.name}: {str(e)}")
     
     return results
-# def process_directory(directory_path: str, file_content: Literal["job_description", "resume"]):
-    
-#     # CHECK IF FILE CONTENT IS JOB DESCRIPTION OR RESUME
-#     if file_content == "job_description":
-#         job_descriptions = []
-
-#         # BEGIN PROCESSING EACH .txt files
-#         job_files = list(Path(directory_path).glob("**/*.txt"))
-
-#         if job_files:
-#             for job_file in job_files:
-#                 try:
-#                     with open(job_file, "r", encoding='utf-8') as f:
-#                         job_description_content = f.read()
-
-#                     job_descriptions.append({
-#                             "name": job_file.name,
-#                             "content": job_description_content
-
-#                         })
-#                 except Exception as e:
-#                     raise RuntimeError(f"Error reading job description file {job_file.name}: {str(e)}")
-
-#             return job_descriptions
-                
-#         else:
-#             raise RuntimeError("No .txt files found in the directory")
-    
-#     elif file_content == "resume":
-#         document_resumes = []
-
-#         for file_path in Path(directory_path).glob("**/*.pdf"):
-#             try:
-#                 # Extract text from PDF
-#                 loader = PyPDFLoader(str(file_path))
-#                 pdf_documents = loader.load()
-
-#                 # Combine all pages into a single document
-#                 full_text = "\n".join([doc.page_content for doc in pdf_documents])
-
-#                 document_resumes.append(Document(
-#                     page_content=full_text,
-#                     metadata={"source": file_path.name}
-#                 ))
-#             except Exception as e:
-#                 raise RuntimeError(f"Error reading resume file {file_path.name}: {str(e)}")
-            
-#         return document_resumes
-    
-#     else:
-#         raise RuntimeError("Invalid file content type.")
 
 # FUNCTION TO FLATTEN RESUME FEEDBACK RANKINGS AND JOB DESCRIPTIONS
 def flatten(all_rankings: Dict[AnyStr, List[ResumeFeedback]], jobs: List[Dict[AnyStr, AnyStr]]):

@@ -135,9 +135,13 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+AI_RAR/venv
+AI_RAR/.venv
+AI_RAR/env
 
 # CACHE
 __pycache__/
+AI_RAR/__pycache__/
 
 # Spyder project settings
 .spyderproject

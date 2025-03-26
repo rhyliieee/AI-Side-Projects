@@ -33,15 +33,6 @@ class MultiJobComparisonState(TypedDict):
     final_recommendations: CrossJobMatchResult
     processed_job_description: Annotated[List[AnyStr], operator.add]
 
-# API Request/Response Models
-# class JobOpening(BaseModel):
-#     name: str
-#     content: str
-
-# class Resume(BaseModel):
-#     page_content: str
-#     metadata: Dict[str, Any]
-
 class AnalysisRequest(BaseModel):
     job_openings: List[Dict[AnyStr, Any]]
     resumes: List[Dict[AnyStr, Any]]
