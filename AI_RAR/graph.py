@@ -45,6 +45,9 @@ def rank_resumes_for_jobs(state: MultiJobComparisonState) -> MultiJobComparisonS
         processed_jobs = []
         jobs_to_process = job_openings
 
+        # TEMPORARY VARIABLE TO HOLD ANALYZED RESUME-JOB OPENING PAIRS
+        # resume_job_pairs = Dict[AnyStr, List[AnyStr]] # {'job_name': [resume1, resume2, resume3]}
+
         # FOR EACH JD, AND RESUME INVOKE RAR AGENT
         for job in jobs_to_process:
             job_name = job.get("name", "")
@@ -52,14 +55,28 @@ def rank_resumes_for_jobs(state: MultiJobComparisonState) -> MultiJobComparisonS
 
             print(f"---PROCESSING JOB: {job_name}---")
 
-            # Skip if already processed
+            # SKIP CURRENT JOB OPENING IF ALREADY PROCESSED
             if job_name in processed_job_description:
                 continue
+
+            # CACHE PROCESSED JOB OPENING FOR PAIRING
+            if not cache_manager.has(job_name):
+                cache_manager.set(job_name, [""]) # CHECK IF PROPERLY INITIALIZED
                 
             # TEMPORARY VARIABLE TO HOLD ANALYZED RESUME
             analyzed_resume = []
 
             for resume in resumes:
+                
+                resume_job_pair = cache_manager.get(job_name)
+
+                # CHECK IF resume_job_pair IS A LIST
+                print(f"---DATA TYPE OF resume_job_pair: {type(resume_job_pair)}")
+
+                # SKIP IF JOB OPENING-RESUME PAIR IS ALREADY PROCESSED
+                if isinstance(resume_job_pair, list) and resume.metadata['source'] in resume_job_pair:
+                    continue
+
                 resume_content = resume.page_content
                 print(f"---ASSESSING {resume.metadata['source']} AGAINST {job_name} IN NODE ONE")
                 
@@ -69,7 +86,10 @@ def rank_resumes_for_jobs(state: MultiJobComparisonState) -> MultiJobComparisonS
                     "resume_content": resume_content
                 })
                 analyzed_resume.append(rar_agent_output) 
-        
+                
+                # ADD RESUME TO PAIR WITH CURRENT JOB IN CACHE
+                cache_manager.append_to_list(job_name, resume.metadata['source'])  
+
             # PERFORM RANKING AND STORE RESULTS
             ranked_resumes = sorted(analyzed_resume, key=lambda record: record.total_score, reverse=True)
             all_rankings[job_name] = ranked_resumes
@@ -158,8 +178,12 @@ def are_all_jobs_processed(state: MultiJobComparisonState) -> str:
         
         # CHECK IF ALL UNIQUE JOBS HAVE BEEN PROCESSED
         all_processed = len(unique_job_names) == len(set(processed_jobs))
+
+        if all_processed:
+            cache_manager.clear()
+            return "CONTINUE"
         
-        return "CONTINUE" if all_processed else "WAIT"
+        return "WAIT"
     except Exception as e:
         raise RuntimeError(f"ERROR IN 'are_all_jobs_processed' NODE: {str(e)}")
         

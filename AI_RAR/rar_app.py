@@ -399,7 +399,7 @@ def render_results():
             
             # Best matches per job
             st.markdown("#### Best Candidate for Each Job")
-            best_matches_per_job = results.get("best_matches_per_job", {})
+            best_matches_per_job = results.get("final_recommendations", {}).get("best_matches_per_job")
             
             if best_matches_per_job:
                 best_job_df = pd.DataFrame([
@@ -412,7 +412,7 @@ def render_results():
             
             # Best matches per resume
             st.markdown("#### Best Job for Each Candidate")
-            best_matches_per_resume = results.get("best_matches_per_resume", {})
+            best_matches_per_resume = results.get("final_recommendations", {}).get("best_matches_per_resume")
             
             if best_matches_per_resume:
                 best_resume_df = pd.DataFrame([

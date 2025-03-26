@@ -39,7 +39,7 @@ class CacheManager:
         """CHECK IF A VARIABLE EXISTS IN THE CACHE"""
         return key in self._cache
     
-    def clear(self, key: str) -> None:
+    def clear(self, key: str = None) -> None:
         """CLEAR A CATEGORY FROM THE CACHE"""
         if key:
             self._cache.pop(key, None)
@@ -47,6 +47,35 @@ class CacheManager:
         else:
             self._cache = {}
             print(f"---ALL CATEGORIES CLEARED FROM CACHE---")
+    
+    def append_to_list(self, key: str, value: Any) -> bool:
+        """APPEND A VALUE TO A LIST IN THE CACHE"""
+        if key in self._cache:
+            if isinstance(self._cache[key], list):
+                self._cache[key].append(value)
+                print(f"---APPENDED VALUE TO {key} IN CACHE---")
+                return True
+            else:
+                print(f"---ERROR: {key} IS NOT A LIST---")
+                return False
+        else:
+            self._cache[key] = [value]
+            print(f"---CREATED NEW LIST WITH VALUE IN {key}---")
+            return True
+
+    def remove_from_list(self, key: str, value: Any) -> bool:
+        """REMOVE A VALUE FROM A LIST IN THE CACHE"""
+        if key in self._cache and isinstance(self._cache[key], list):
+            try:
+                self._cache[key].remove(value)
+                print(f"---REMOVED VALUE FROM {key} IN CACHE---")
+                return True
+            except ValueError:
+                print(f"---VALUE NOT FOUND IN {key}---")
+                return False
+        else:
+            print(f"---ERROR: {key} NOT FOUND OR NOT A LIST---")
+            return False
 
 # FUNCTION TO LOAD PROMPTS
 def load_prompts(path: Path) -> dict:

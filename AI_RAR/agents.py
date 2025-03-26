@@ -87,7 +87,6 @@ def initialize_llm(model_name: str) -> BaseChatModel:
                     continue
                 raise e
 
-        
 
 # CREATE THE RESUME ANALYZER RERANKER AGENT
 def create_rar_agent() -> RunnableSerializable:
